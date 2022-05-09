@@ -16,6 +16,7 @@ const abi = [
     ],
     anonymous: false,
   },
+  { type: "event", name: "RenewIncentive", inputs: [], anonymous: false },
   {
     type: "event",
     name: "SetIncentiveDuration",
@@ -101,6 +102,13 @@ const abi = [
     outputs: [{ type: "address", name: "", internalType: "address" }],
     name: "owner",
     inputs: [],
+  },
+  {
+    type: "function",
+    stateMutability: "nonpayable",
+    outputs: [],
+    name: "renewBeneficiaries",
+    inputs: [{ type: "address[]", name: "addressArray", internalType: "address[]" }],
   },
   { type: "function", stateMutability: "nonpayable", outputs: [], name: "renounceOwnership", inputs: [] },
   {
