@@ -1,7 +1,7 @@
 import { Contract, ethers, Event, EventFilter } from "ethers";
 import abi from "./abi";
 import address from "./address";
-import provider from "../provider";
+import provider from "./provider";
 import { AddressIncentiveProgram, AddressStatus, AddressToIncentive } from "./types";
 import { Interface } from "ethers/lib/utils";
 

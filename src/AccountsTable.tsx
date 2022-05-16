@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Table, Button, Card, Spinner, ButtonGroup, InputGroup, FormControl, Toast } from "react-bootstrap";
-import IncentiveContract from "./smartContracts/incentiveContract/index";
-import { AddressIncentiveProgram } from "./smartContracts/incentiveContract/types";
+import IncentiveContract from "./smartContract/index";
+import { AddressIncentiveProgram } from "./smartContract/types";
 
 export default function AccountsTable() {
   const [inputValue, setInputValue] = useState("");
