@@ -7,10 +7,10 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <p>DAppNode incentive program</p>
+        <p>DAppNode Gnosis Validator Incentive Program</p>
       </header>
       <p>
-        DAppNode incentive program. Check the status of the accounts included in the gnosis incentive program. SC
+        DAppNode Gnosis Validator Incentive Program. Check the status of the accounts included in the Gnosis incentive program. SC
         address: 0x6C68322cf55f5f025F2aebd93a28761182d077c3
       </p>
       <AccountsTable />
