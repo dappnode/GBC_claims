@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/GBC_claims/static/css/main.e6df542d.css",
-    "main.js": "/GBC_claims/static/js/main.bb7b0631.js",
+    "main.js": "/GBC_claims/static/js/main.e529fea7.js",
     "static/js/787.46493d11.chunk.js": "/GBC_claims/static/js/787.46493d11.chunk.js",
     "index.html": "/GBC_claims/index.html",
     "main.e6df542d.css.map": "/GBC_claims/static/css/main.e6df542d.css.map",
-    "main.bb7b0631.js.map": "/GBC_claims/static/js/main.bb7b0631.js.map",
+    "main.e529fea7.js.map": "/GBC_claims/static/js/main.e529fea7.js.map",
     "787.46493d11.chunk.js.map": "/GBC_claims/static/js/787.46493d11.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.e6df542d.css",
-    "static/js/main.bb7b0631.js"
+    "static/js/main.e529fea7.js"
   ]
 }
