@@ -9,4 +9,4 @@ export interface AddressIncentiveProgram {
   timestamp?: string;
 }
 
-export type AddressStatus = "claimed" | "pending" | "expired" | "renewed" | "notWhitelisted" | "unknown";
+export type AddressStatus = "claimed" | "pending" | "expired" | "renewed" | "notWhitelisted" | "unknown" | "error" ;

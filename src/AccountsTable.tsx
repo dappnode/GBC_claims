@@ -40,7 +40,7 @@ export default function AccountsTable() {
       setLoadingMultipleAddresses(false);
       setErrorMultipleAddresses(true);
       setErrorMessage(e.message);
-      console.error("Error getting addresses: " + e);
+      console.error("Error getting latest addresses: " + e);
     }
   }
 
@@ -54,7 +54,7 @@ export default function AccountsTable() {
       setLoadingMultipleAddresses(false);
       setErrorMultipleAddresses(true);
       setErrorMessage(e.message);
-      console.error("Error getting addresses: " + e);
+      console.error("Error getting historical addresses: " + e);
     }
   }
 

@@ -15,7 +15,7 @@ export class IncentiveContract extends Contract {
   public async getAddress(addressRequest: string): Promise<AddressIncentiveProgram> {
     return {
       address: addressRequest,
-      status: await this.getAddressStatus(addressRequest).catch(() => "unknown"),
+      status: await this.getAddressStatus(addressRequest).catch(() => "error"),
       timestamp: "not available",
     };
   }
@@ -75,36 +75,49 @@ export class IncentiveContract extends Contract {
    */
   private async getExecTransactionInput(events: Event[]): Promise<AddressIncentiveProgram[]> {
     const addresses: AddressIncentiveProgram[] = [];
+    var counters:{[key: string]: number} = {};
     for (const event of events) {
-      const transaction = await provider.getTransaction(event.transactionHash);
+      try {
 
-      const ifaceMultisig = new Interface([
-        "function execTransaction(address to, uint256 value, bytes data, uint8 operation, uint256 safeTxGas, uint256 baseGas, uint256 gasPrice, address gasToken, address refundReceiver, bytes signatures)",
-      ]);
+          const transaction = await provider.getTransaction(event.transactionHash);
 
-      const multisigDataDecoded = ifaceMultisig.decodeFunctionData("execTransaction", transaction.data);
-      const decoded = this.interface.decodeFunctionData("addBeneficiaries", multisigDataDecoded.data);
+          const ifaceMultisig = new Interface([
+          "function execTransaction(address to, uint256 value, bytes data, uint8 operation, uint256 safeTxGas, uint256 baseGas, uint256 gasPrice, address gasToken, address refundReceiver, bytes signatures)",
+        ]);
+        
+        const multisigDataDecoded = ifaceMultisig.decodeFunctionData("execTransaction", transaction.data);
+        const decoded = this.interface.decodeFunctionData("addBeneficiaries", multisigDataDecoded.data);
+        
+        const decodedAddresses: string[] = decoded.addressArray;
+        const uniqueAddresses: string[] = decodedAddresses.filter(
+          (address: string) => !addresses.map((address: AddressIncentiveProgram) => address.address).includes(address)
+          );
+          
+          const timestamp = transaction.blockNumber
+          ? new Date((await provider.getBlock(transaction.blockNumber)).timestamp * 1000).toString()
+          : "";
 
-      const decodedAddresses: string[] = decoded.addressArray;
-      const uniqueAddresses: string[] = decodedAddresses.filter(
-        (address: string) => !addresses.map((address: AddressIncentiveProgram) => address.address).includes(address)
-      );
-
-      const timestamp = transaction.blockNumber
-        ? new Date((await provider.getBlock(transaction.blockNumber)).timestamp * 1000).toString()
-        : "";
-
-      const addressesToIncentive: AddressIncentiveProgram[] = await Promise.all(
-        uniqueAddresses.map(async (address: string) => {
-          return {
-            address,
-            status: await this.getAddressStatus(address).catch(() => "unknown"),
-            timestamp,
-          };
-        })
-      );
-      addresses.push(...addressesToIncentive);
-    }
+            var addressesToIncentive: AddressIncentiveProgram[] = [];
+            // Iterating one by one to reduce
+            for (var i = 0; i < uniqueAddresses.length; i++) {
+              const oneAddress:string = uniqueAddresses[i];
+              const addressStatus: AddressStatus = await this.getAddressStatus(oneAddress);              
+              counters[addressStatus] = (counters[addressStatus] || 0) + 1;
+              addressesToIncentive.push({
+                address: oneAddress,
+                status: addressStatus,
+                timestamp: timestamp,
+              });
+ 
+            }
+ 
+            addresses.push(...addressesToIncentive);
+        } catch (e) {
+          console.error("Oops! address: " + address + " had issues retrieving status. " + e);
+          counters["rpc_error"] = (counters["rpc_error"] || 0) + 1;
+        }
+      }
+      console.log(counters);
     return addresses;
   }
 
@@ -131,8 +144,8 @@ export class IncentiveContract extends Contract {
         uniqueAddresses.map(async (address: string) => {
           return {
             address,
-            status: await this.getAddressStatus(address).catch(() => "unknown"),
-            timestamp,
+            status: await this.getAddressStatus(address).catch(() => "error"),
+            timestamp: timestamp,
           };
         })
       );
@@ -145,13 +158,20 @@ export class IncentiveContract extends Contract {
    * @returns the status of an address
    */
   private async getAddressStatus(address: string): Promise<AddressStatus> {
-    const addressToIncentive: AddressToIncentive = await this.addressToIncentive(address); // returns struct {endTime, isClaimed}
-    const { endTime, isClaimed } = addressToIncentive;
-
-    if (isClaimed) return "claimed";
-    if (endTime === 0) return "notWhitelisted";
-    if (endTime < Math.floor(Date.now() / 1000)) return "expired";
-    if (endTime > Math.floor(Date.now() / 1000)) return "pending";
-    return "renewed";
+      for (var retries = 0; retries < 5; retries++) {
+        try {
+          const addressToIncentive: AddressToIncentive = await this.addressToIncentive(address); // returns struct {endTime, isClaimed}
+          const { endTime, isClaimed } = addressToIncentive;
+          if (isClaimed) return "claimed";
+          if (endTime === 0) return "notWhitelisted";
+          if (endTime < Math.floor(Date.now() / 1000)) return "expired";
+          if (endTime > Math.floor(Date.now() / 1000)) return "pending";
+          return "renewed";
+        } catch (e) {
+          console.warn("[" + retries + "/5] Retrying in " + (retries + 1) * 2 + " seconds. Address : " + address + " -> error: " + e);
+          await new Promise(f => setTimeout(f, (retries + 1) * 2000));
+        }
+      }
+      return "error";
   }
 }
