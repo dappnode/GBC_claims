@@ -228,10 +228,16 @@ export class IncentiveContract extends Contract {
         const addressToIncentive: AddressToIncentive =
           await this.addressToIncentive(address); // returns struct {endTime, isClaimed}
         const { endTime, isClaimed } = addressToIncentive;
+        const endTimeBigNumber = ethers.BigNumber.from(endTime);
+
+        console.log("isClaimed: ", isClaimed, " | endTime: ", endTime);
+
         if (isClaimed) return "claimed";
-        if (endTime === 0) return "notWhitelisted";
-        if (endTime < Math.floor(Date.now() / 1000)) return "expired";
-        if (endTime > Math.floor(Date.now() / 1000)) return "pending";
+        if (endTimeBigNumber.isZero()) return "notWhitelisted";
+        if (endTimeBigNumber.lte(Math.floor(Date.now() / 1000)))
+          return "expired";
+        if (endTimeBigNumber.gt(Math.floor(Date.now() / 1000)))
+          return "pending";
         return "renewed";
       } catch (e) {
         console.warn(
